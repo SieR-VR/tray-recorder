@@ -1,5 +1,5 @@
 from pystray import Icon, Menu, MenuItem
-from audio_input import get_audio_device_list, get_default_audio_device
+from audio_input import get_audio_device_list, get_default_audio_device, start_record_audio, stop_record_audio
 
 from PIL import Image, ImageDraw
 
@@ -48,11 +48,27 @@ def create_image(width, height, color1, color2):
 
     return image
 
+is_recording = False
+toggle_text = "Start Recording"
+
+
+
+def toggle_recording():
+    global is_recording, selected_index, toggle_text
+
+    is_recording = not is_recording
+    toggle_text = "Stop Recording" if is_recording else "Start Recording"
+
+    if is_recording:
+        start_record_audio(selected_index)
+    else:
+        stop_record_audio()
+
 icon = Icon(
     'tray-recorder', 
     icon=create_image(64, 64, 'black', 'white'),
     menu=Menu(
-        MenuItem('Start Recording', lambda: print('Start Recording')),
+        MenuItem(lambda text: toggle_text, toggle_recording),
         MenuItem('Devices', Menu(
             lambda: [MenuItem(device_name, set_audio_device(index, device_name)) for (index, device_name) in audio_device_list] +
             [MenuItem("Refresh", refresh_audio_device_list)]
